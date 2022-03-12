@@ -1,0 +1,30 @@
+{
+  "timeZone": "Asia/Hong_Kong",
+  "dependencies": {
+    "enabledAdvancedServices": [{
+      "userSymbol": "Docs",
+      "serviceId": "docs",
+      "version": "v1"
+    }, {
+      "userSymbol": "Drive",
+      "serviceId": "drive",
+      "version": "v2"
+    }, {
+      "userSymbol": "Sheets",
+      "serviceId": "sheets",
+      "version": "v4"
+    }],
+    "libraries": [{
+      "userSymbol": "RangeListApp",
+      "libraryId": "1L44xvi-AsdwbYgqeb63e2i-7PpC01Mt-1fgNO2HpTTvAHPMU1HteAIsY",
+      "version": "2"
+    }]
+  },
+  "webapp": {
+    "access": "MYSELF",
+    "executeAs": "USER_DEPLOYING"
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "oauthScopes": ["https://www.googleapis.com/auth/script.container.ui", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/documents", "https://www.googleapis.com/auth/script.external_request", "https://www.googleapis.com/auth/drive"],
+  "runtimeVersion": "V8"
+}

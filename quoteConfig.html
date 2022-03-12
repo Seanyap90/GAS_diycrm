@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+  <div id = "quoteGen">
+  <p>
+    <label for="Quotation No"><span>Quotation No:</span></label>
+    <input type="text" class="form-control w-100" id="QuoteNo">
+  </p>
+  <p>
+    <label for="selecteditems" id="selectedItems"><span>Selected items and unit info:</span></label>
+  </p>
+  <table class = "table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Part Number</th>
+        <th>Cost(SGD)</th>
+        <th>Sell(SGD)</th>
+        <th>Unit Profit</th>
+        <th>Quantity</th>
+      </tr>
+    </thead>
+    <tbody id = "selectedItemInfo">
+  
+    </tbody>
+  </table>
+  <template id = "quoteGenTemplate">
+    <tr>
+      <td class = "productDetail" style="word-wrap: break-word;min-width: 70px;max-width: 70px;"></td>
+      <td class = "partNumber" style="word-wrap: break-word;min-width: 60px;max-width: 60px;"></td>
+      <td class = "CostPrice" style="word-wrap: break-word;min-width: 40px;max-width: 40px;"></td>
+      <td class = "Price" style="word-wrap: break-word;min-width: 40px;max-width: 40px;"></td>
+      <td class = "Profit" style="word-wrap: break-word;min-width: 40px;max-width: 40px;"></td>
+      <td class = "Quantity" style="word-wrap: break-word;min-width: 30px;max-width: 30px;"></td>
+    </tr>
+  </template>
+  <p>
+    <button id = "confirm">Confirm</button><button id = "reset">Reset</button>
+  </p>
+  <p>
+    <button hidden = "hidden" id = "toGenQuote">Generate Quote</button>
+  </p>
+  <div class = "alert alert-success invisible" id = "quoteGenSuccess" role ="alert">
+  </div>
+  </div>
+  </body>
+</html>

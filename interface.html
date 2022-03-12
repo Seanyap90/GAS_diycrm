@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <style>
+      .nav-link{
+        cursor:pointer;
+      }
+    </style>
+    <script>
+    // code to toggle between dropdown options
+      $(document).ready(function(){
+        $("select").change(function(){
+          $(this).find("option:selected").each(function(){
+              var optionValue = $(this).attr("value");
+              if(optionValue){
+                  $(".box").not("." + optionValue).hide();
+                  $("." + optionValue).show();
+              } else{
+                $(".box").hide();
+              }
+          });
+        }).change();
+      });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class= "dropdown">
+        <select>
+            <option>Choose Sales Stage</option>
+            <option value="Prospect">Prospect</option>
+            <option value="Lead">Lead</option>
+        </select>
+      </div>
+      <br>
+      
+      <div class="Prospect box" id="Prospectbox">
+        <ul class="nav nav-pills main-nav" id="prospectnav">
+          <li class="nav nav-pills nav-fill">
+            <a class="nav-link active" id="add-prospect" aria-current="page">Add</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="search-prospect">Search</a>
+          </li>
+        </ul>
+        <div id ="Prospectapp"></div>
+      </div>
+      
+      <div class="Lead box" id="Leadbox">
+        <ul class="nav nav-pills main-nav" id="leadnav">
+          <li class="nav nav-pills nav-fill">
+            <a class="nav-link active" id="add-lead" aria-current="page">Add</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="lead-search">Search</a>
+          </li>
+        </ul>  
+        <div id ="Leadapp"></div>
+      </div>
+     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <script>    
+       // PROSPECT SECTION - Initialisation
+       var prospectData;
+       
+       function loadProspectView(options){
+         var id = typeof options.id === "undefined" ? "Prospectapp": options.id;
+         var cb = typeof options.callback === "undefined"? function(){} : options.callback;
+         google.script.run.withSuccessHandler(function(html){
+           document.getElementById("Prospectapp").innerHTML = html;
+           typeof options.params === "undefined"? cb() : cb(options.params);
+         })[options.func]();
+       }
+
+       // PROSPECT SECTION - load add prospect section
+       function loadProspectAdd(){
+         loadProspectView({func: "loadProspectAdd"});
+       }
+       
+       // PROSPECT SECTION - load search current prospect database section
+       function loadProspectSearch(){
+         loadProspectView({func: "loadProspectSearch", callback: setProspectDataForSearch});
+       }
+       
+       // PROSPECT SECTION - load edit current prospect section
+       function loadProspectEdit(e){
+         loadProspectView({func: "loadProspectEdit", callback: afterProspectEditView, params: {searchprospectID: e.target.dataset.prospectid} });
+       }
+       // PROSPECT SECTION - Connect to backend for Search function
+       function setProspectDataForSearch(){
+         google.script.run.withSuccessHandler(function(prospectDataReturned){
+           prospectData = prospectDataReturned.slice();
+           console.log(prospectData);
+           }).getProspectDataForSearch();
+       }
+       
+       // PROSPECT SECTION - Call prospect information from sheets
+       function afterProspectEditView(params){
+         document.getElementById("ProspectEditId").value = params.searchprospectID;
+         google.script.run.withSuccessHandler(function(prsptInfo){
+           document.getElementById("ProspectEditCompany").value = prsptInfo.searchprospectcompany;
+           document.getElementById("ProspectEditName").value = prsptInfo.searchprospectname;
+           document.getElementById("ProspectEditFirstName").value = prsptInfo.searchprospectfirstname;
+           document.getElementById("ProspectEditLastName").value = prsptInfo.searchprospectlastname;
+           document.getElementById("ProspectEditEmail").value = prsptInfo.serchprospectemail;
+           document.getElementById("ProspectEditContact").value = prsptInfo.searchprospectphone;
+           document.getElementById("ProspectEditTopic").value = prsptInfo.searchprospecttopic;
+         }).getProspectById(params.searchprospectID);
+       }
+       
+       // PROSPECT SECTION - Update prospect information after edit
+       function editProspect(){
+         var prsptInfo = {}
+         prsptInfo.searchprospectcompany = document.getElementById("ProspectEditCompany").value;
+         prsptInfo.searchprospectname = document.getElementById("ProspectEditName").value;
+         prsptInfo.searchprospectfirstname = document.getElementById("ProspectEditFirstName").value;
+         prsptInfo.searchprospectlastname = document.getElementById("ProspectEditLastName").value;
+         prsptInfo.searchprospectemail = document.getElementById("ProspectEditEmail").value;
+         prsptInfo.searchprospectphone = document.getElementById("ProspectEditContact").value;
+         prsptInfo.searchprospecttopic = document.getElementById("ProspectEditTopic").value;
+         console.log(prsptInfo);
+         var id = document.getElementById("ProspectEditId").value;
+         google.script.run.withSuccessHandler(function(res){
+           document.getElementById("save-success-message-edit").classList.remove("invisible");
+           setTimeout(function(){
+             document.getElementById("save-success-message-edit").classList.add("invisible");
+           },2000);
+         }).editProspectById(id,prsptInfo);
+       }
+       
+       // PROSPECT SECTION - active tab change
+       function activeTabChange(e){
+         var navLinks = document.querySelectorAll(".main-nav .nav-link");
+         console.log(navLinks);
+         navLinks.forEach(function(linkE1){
+           linkE1.classList.remove("active");
+         });
+         e.target.classList.add("active");  
+       }
+       
+       // PROSPECT SECTION - toggle between add and search on nav bar
+       document.getElementById("add-prospect").addEventListener("click", loadProspectAdd);
+       document.getElementById("search-prospect").addEventListener("click", loadProspectSearch);
+       
+       
+       // PROSPECT SECTION - connect to server side to update sheets after adding prospect
+       function addProspect(){
+         var prospectInfo = {};
+         prospectInfo.id = document.getElementById("ProspectId").value;
+         prospectInfo.company = document.getElementById("ProspectCompany").value;
+         prospectInfo.name = document.getElementById("ProspectName").value;
+         prospectInfo.firstName = document.getElementById("ProspectFirstName").value;
+         prospectInfo.lastName = document.getElementById("ProspectLastName").value;
+         prospectInfo.email = document.getElementById("ProspectEmail").value;
+         prospectInfo.ownUrl = document.getElementById("ProspectUrl").value;
+         
+         google.script.run.withSuccessHandler(function(){
+           document.getElementById("ProspectId").value = " ";
+           document.getElementById("ProspectCompany").value = " ";
+           document.getElementById("ProspectName").value = " ";
+           document.getElementById("ProspectFirstName").value = " ";
+           document.getElementById("ProspectLastName").value = " ";
+           document.getElementById("ProspectEmail").value = " ";
+           document.getElementById("ProspectUrl").value = " ";
+           document.getElementById("save-success-message").classList.remove("invisible");
+           setTimeout(function(){
+             document.getElementById("save-success-message").classList.add("invisible");
+           }, 2000);
+         }).addProspect(prospectInfo);
+       }
+       
+       // PROSPECT SECTION - Enable Search feature
+       function searchProspect(){
+         var searchInput = document.getElementById("prospectsearchInput").value.toString().toLowerCase().trim();
+         var searchWords = searchInput.split(/\s+/);
+         var searchColumns = [0,1,2];
+         
+         var resultsArray = searchInput === "" ? [] : prospectData.filter(function(r){
+           return searchWords.every(function(word){
+             return searchColumns.some(function(colIndex){
+               return r[colIndex].toString().toLowerCase().indexOf(word) !== -1
+             });
+           });
+         });
+         var searchResultsBox = document.getElementById("searchResults");
+         var templateBox = document.getElementById("rowTemplate");
+         var template = templateBox.content;
+         
+         searchResultsBox.innerHTML = "";
+         
+         resultsArray.forEach(function(r){
+           var tr = template.cloneNode(true);
+           var idofProspectCol = tr.querySelector(".prospectIdDetail");
+           var nameOfProspectCol = tr.querySelector(".prospectNameDetail");
+           var companyofProspectCol = tr.querySelector(".prospectCompanyDetail");
+           var editButton = tr.querySelector(".edit-button");
+           idofProspectCol.textContent = r[0];
+           nameOfProspectCol.textContent = r[2];
+           companyofProspectCol.textContent = r[1];
+           editButton.dataset.prospectid = r[0];
+           searchResultsBox.appendChild(tr);
+         });
+       }
+                  
+       // PROSPECT SECTION - function to handle clicks for custom functions
+       function clickEventHandler(e){
+         if(e.target.matches("#add-prospect-button")){
+           addProspect();
+         }
+         if(e.target.matches(".edit-button")){
+           loadProspectEdit(e); 
+         }
+         if (e.target.matches("#save-prospect-edit")){
+           editProspect(e);
+         }
+         if (e.target.matches("#cancel-prospect-edit")){
+           loadProspectSearch(e);
+         }
+       }
+       
+       function navClickEventHandler(e){
+         if(e.target.matches(".nav-link")){
+           activeTabChange(e);
+         }
+       }
+       
+       function inputEventHandler(e){
+         if(e.target.matches("#prospectsearchInput")){
+           searchProspect();
+         }
+       }
+             
+       // PROSPECT SECTION - wait for specific events
+       document.getElementById("Prospectapp").addEventListener("click", clickEventHandler);
+       document.getElementById("prospectnav").addEventListener("click", navClickEventHandler);
+       document.getElementById("Prospectapp").addEventListener("input", inputEventHandler);
+       
+       
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------               
+       var leadData;
+       
+       // LEAD SECTION - Initialisation
+       function loadLeadView(options){
+         var id = typeof options.id === "undefined" ? "Leadapp": options.id;
+         var cb = typeof options.callback === "undefined"? function(){} : options.callback;
+         google.script.run.withSuccessHandler(function(html){
+           document.getElementById("Leadapp").innerHTML = html;
+           typeof options.params === "undefined"? cb() : cb(options.params);
+         })[options.func]();
+        }
+       
+       // LEAD SECTION - Add leads
+       function loadLeadAdd(){
+         loadLeadView({func: "loadLeadAdd"});
+       }
+       
+       // LEAD SECTION - Custom search within current lead database
+       function loadLeadSearch(){
+         loadLeadView({func: "loadLeadSearch", callback: setLeadDataForSearch});
+       }
+
+       // LEAD SECTION - load edit current lead section
+       function loadLeadEdit(e){
+         loadLeadView({func: "loadLeadEdit", callback: afterLeadEditView, params: {searchLeadID: e.target.dataset.leadid} });
+       }
+       
+       // LEAD SECTION - Connect to backend for Search function
+       function setLeadDataForSearch(){
+         google.script.run.withSuccessHandler(function(leadDataReturned){
+           leadData = leadDataReturned.slice();
+           console.log(leadData);
+           }).getLeadDataForSearch();
+       }
+       
+       // LEAD SECTION - connect to server side to update sheets after adding lead
+       function addLead(){
+         
+         var leadInfo = {};
+         leadInfo.company = document.getElementById("LeadCompany").value;
+         leadInfo.name = document.getElementById("LeadName").value;
+         leadInfo.firstName = document.getElementById("LeadFirstName").value;
+         leadInfo.lastName = document.getElementById("LeadLastName").value;
+         leadInfo.email = document.getElementById("LeadEmail").value;
+         leadInfo.contact = document.getElementById("LeadContact").value;
+         leadInfo.leadProject = document.getElementById("LeadProject").value;
+         leadInfo.leadDetails = document.getElementById("LeadDetails").value;
+         
+         google.script.run.withSuccessHandler(function(){
+           document.getElementById("LeadCompany").value = " ";
+           document.getElementById("LeadName").value = " ";
+           document.getElementById("LeadFirstName").value = " ";
+           document.getElementById("LeadLastName").value = " ";
+           document.getElementById("LeadEmail").value = " ";
+           document.getElementById("LeadContact").value = " ";
+           document.getElementById("LeadProject").value = " ";
+           document.getElementById("LeadDetails").value = " ";
+           document.getElementById("save-success-message-lead").classList.remove("invisible");
+           setTimeout(function(){
+             document.getElementById("save-success-message-lead").classList.add("invisible");
+           }, 2000);
+         }).addLead(leadInfo);
+       }
+
+       // LEAD SECTION - Enable Search feature
+       function searchLead(){
+         var searchInput = document.getElementById("leadsearchInput").value.toString().toLowerCase().trim();
+         var searchWords = searchInput.split(/\s+/);
+         var searchColumns = [0,1,2];
+         console.log(searchColumns);
+         
+         var resultsArray = searchInput === "" ? [] : leadData.filter(function(r){
+           return searchWords.every(function(word){
+             return searchColumns.some(function(colIndex){
+               return r[colIndex].toString().toLowerCase().indexOf(word) !== -1
+             });
+           });
+         });
+         var searchResultsBox = document.getElementById("leadsearchResults");
+         var templateBox = document.getElementById("leadrowTemplate");
+         var template = templateBox.content;
+         
+         searchResultsBox.innerHTML = "";
+         
+         resultsArray.forEach(function(r){
+           var tr = template.cloneNode(true);
+           var idofLeadCol = tr.querySelector(".leadIdDetail");
+           var nameOfLeadCol = tr.querySelector(".leadNameDetail");
+           var companyofLeadCol = tr.querySelector(".leadCompanyDetail");
+           var editButton = tr.querySelector(".edit-button");
+           idofLeadCol.textContent = r[0];
+           nameOfLeadCol.textContent = r[2];
+           companyofLeadCol.textContent = r[1];
+           editButton.dataset.leadid = r[0];
+           searchResultsBox.appendChild(tr);
+         });
+       }
+       
+       // LEAD SECTION - Call lead information from sheets
+       function afterLeadEditView(params){
+         document.getElementById("LeadEditId").value = params.searchLeadID;
+         google.script.run.withSuccessHandler(function(LeadInfo){
+           document.getElementById("LeadEditCompany").value = LeadInfo.searchleadcompany;
+           document.getElementById("LeadEditName").value = LeadInfo.searchleadname;
+           document.getElementById("LeadEditFirstName").value = LeadInfo.searchleadfirstname;
+           document.getElementById("LeadEditLastName").value = LeadInfo.searchleadlastname;
+           document.getElementById("LeadEditEmail").value = LeadInfo.searchleademail;
+           document.getElementById("LeadEditContact").value = LeadInfo.searchleadphone;
+           document.getElementById("LeadEditProject").value = LeadInfo.searchleadproject;
+           document.getElementById("LeadEditDetail").value = LeadInfo.searchleadprojectdetail;
+         }).getLeadById(params.searchLeadID);
+       }       
+
+       // LEAD SECTION - Update lead information after edit
+       function editLead(){
+         console.log("ok");
+         var LeadInfo = {}
+         LeadInfo.searchleadcompany = document.getElementById("LeadEditCompany").value;
+         LeadInfo.searchleadname = document.getElementById("LeadEditName").value;
+         LeadInfo.searchleadfirstname = document.getElementById("LeadEditFirstName").value;
+         LeadInfo.searchleadlastname = document.getElementById("LeadEditLastName").value;
+         LeadInfo.searchleademail = document.getElementById("LeadEditEmail").value;
+         LeadInfo.searchleadphone = document.getElementById("LeadEditContact").value;
+         LeadInfo.searchleadproject = document.getElementById("LeadEditProject").value;
+         LeadInfo.searchleadprojectdetail = document.getElementById("LeadEditDetail").value;
+         console.log(LeadInfo);
+         var id = document.getElementById("LeadEditId").value;
+         google.script.run.withSuccessHandler(function(res){
+           document.getElementById("lead-save-success-message-edit").classList.remove("invisible");
+           setTimeout(function(){
+             document.getElementById("lead-save-success-message-edit").classList.add("invisible");
+           },2000);
+         }).editLeadById(id,LeadInfo);
+       }
+       
+       // LEAD SECTION - active tab change
+       function activeTabChangeLead(e){
+         var navLinks = document.querySelectorAll(".main-nav .nav-link");
+         console.log(navLinks);
+         navLinks.forEach(function(linkE1){
+           linkE1.classList.remove("active");
+         });
+         e.target.classList.add("active");  
+       }
+       document.getElementById("add-lead").addEventListener("click", loadLeadAdd);
+       document.getElementById("lead-search").addEventListener("click", loadLeadSearch); 
+       
+       // LEAD SECTION - function to handle clicks for custom functions 
+       function clickEventHandlerLead(e){
+         if(e.target.matches("#add-lead-button")){
+           addLead();
+         }
+         if(e.target.matches(".edit-button")){
+           loadLeadEdit(e); 
+         }
+         if (e.target.matches("#save-Lead-edit")){
+           editLead(e);
+         }
+         if (e.target.matches("#cancel-Lead-edit")){
+           loadLeadSearch(e);
+         }
+       }
+       function navClickEventHandlerLead(e){
+         if(e.target.matches(".nav-link")){
+           activeTabChangeLead(e);
+         }
+       }
+
+       function inputEventHandlerLead(e){
+         if(e.target.matches("#leadsearchInput")){
+           searchLead();
+         }
+       }
+       
+       // LEAD SECTION - wait for specific events
+       document.getElementById("Leadapp").addEventListener("click", clickEventHandlerLead);
+       document.getElementById("leadnav").addEventListener("click", navClickEventHandlerLead);
+       document.getElementById("Leadapp").addEventListener("input", inputEventHandlerLead);
+ 
+ 
+    </script>
+  </body>
+</html>

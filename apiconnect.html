@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <div class="urlinput">
+      <p>Please ensure backend API is running in Google Colab before filling the form</p>
+      <label for="urlinputngrok"><span>Input API URL to connect to backend, process to take about 2 minutes:</span></label>
+      <input type="text" class="form-control w-100" id="urlinputngrok">
+    </div>
+    <div class = "sesamilogin">
+      <label for = "useridinput"><span>User id:</span></label>
+      <input type="text" class="form-control w-100" id="useridinput">
+      <label for = "usernameinput"><span>Username:</span></label>
+      <input type="text" class="form-control w-100" id="usernameinput">
+      <label for = "passwordinput"><span>Password:</span></label>
+      <input type="password" class="form-control w-100" id="passwordinput">
+    </div>
+    <div>
+      <button class="btn btn-primary" id="submit">Submit</button>
+    </div>
+    <div id="apiresult" role="alert">
+    </div>
+    <script>
+      function globalVariable(){
+        var userLogin = new Object();
+        userLogin.url = document.getElementById("urlinputngrok").value;
+        userLogin.userid = document.getElementById("useridinput").value;
+        userLogin.username = document.getElementById("usernameinput").value.toLowerCase();
+        userLogin.password = document.getElementById("passwordinput").value;
+        return userLogin;
+      }
+      
+      function loadResultTable(result){
+        var tabledata = result
+        google.script.run.withSuccessHandler(function(html,tabledata){
+          document.getElementById("apiresult").innerHTML = html;
+          
+          var table = document.createElement("table");          
+          var datahead = result[0];
+          
+          function generateTableHead(table, head) {
+            let thead = table.createTHead();
+            let row = thead.insertRow();
+            for (let key of head) {
+              let th = document.createElement("th");
+              let text = document.createTextNode(key);
+              th.appendChild(text);
+              row.appendChild(th);
+             }
+          }
+          function generateTable(table, items) {
+            for (i=1; i<items.length; i++) {
+              let row = table.insertRow();
+              for (j=0; j<items[i].length; j++) {
+                let cell = row.insertCell();
+                if (j===2 && items[i][j] !== " "){
+                  let button = document.createElement("button");
+                  button.type = 'button';
+                  button.class = 'btn btn-outline-dark edit-button';
+                  button.innerHTML = "Click to Download PDF";
+                  button.value = items[i][j];
+                  cell.id = 'url' + i;
+                  button.addEventListener("click", function(){
+                    var url = button.value;
+                    console.log(url);
+                    connectApiPDF(url);
+                    console.log("ok");
+                  });
+                  cell.appendChild(button);
+                } else{
+                  let text = document.createTextNode(items[i][j]);
+                  cell.appendChild(text);        
+                }
+              }
+            }
+          }         
+          
+          generateTableHead(table, datahead);
+          generateTable(table, result);    
+          document.getElementById("prepare-to-download").classList.remove("invisible");
+          document.getElementById("apiresult").appendChild(table);
+        }).loadPDFLinks();
+      };
+      
+      function connectApiUrl(){
+        document.getElementById("urlinputngrok").disabled = true;
+        document.getElementById("useridinput").disabled = true;
+        document.getElementById("usernameinput").disabled = true;
+        document.getElementById("passwordinput").disabled = true;
+        document.getElementById("submit").disabled = true;
+        google.script.run.withSuccessHandler(function(data2){
+          loadResultTable(data2);
+        }).connectapi(globalVariable().url, globalVariable().userid, 
+                      globalVariable().username, globalVariable().password);
+      };
+      
+      function connectApiPDF(pdfurl){
+        var pdf_url = pdfurl;
+        $('td').each(function(){
+          $(this).find('button').prop('disabled', true);
+        });
+        google.script.run.withSuccessHandler(function(responseString){
+          var apiResponse = document.createElement('p');
+          apiResponse.innerHTML = responseString;
+          document.getElementById("pdf-download-message-success").classList.remove("invisible");
+          document.getElementById("pdf-download-message-success").appendChild(apiResponse)
+          $('td').each(function(){
+            $(this).find('button').prop('disabled', false);
+          });
+          setTimeout(function(){
+            document.getElementById("pdf-download-message-success").classList.add("invisible");
+            document.getElementById("pdf-download-message-success").textContent = "";
+          }, 2500);
+        }).downloadPDF(globalVariable().url, globalVariable().userid, 
+                      globalVariable().username, globalVariable().password, pdf_url)
+      };
+      
+      function clickEventHandler(e){
+         if(e.target.matches("#submit")){
+           connectApiUrl();
+        }
+      };
+
+      document.getElementById("submit").addEventListener("click", clickEventHandler);
+      
+    </script>
+  </body>
+</html>
