@@ -20,7 +20,7 @@ To explain further:
 
 3. Appscript.json shows the services that needs to be authenticated within the app script
 
-4. apifunc.gs is custom to a very specific use case but the structure is similar to connecting to different API for post or get requests and login to various software platforms.  You can restructure the login parameters by manipulating the html code accordingly.
+4. apifunc.gs is custom to a very specific use case but the structure is similar to connecting to different API for post or get requests and login to various software platforms.  You can restructure the login parameters by manipulating the html code at apiconnect.html accordingly.
 
 
 # Part 2: Required documents
