@@ -31,7 +31,7 @@ function directMailMergePopUp(){
 function directMailmerge(val,title){
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ws = ss.getActiveSheet();
-  var doc = DocumentApp.openById("1ogy-Dvvlef8tUIA-3quqp4STeFb1LnRrP5YSiBpXX6w");
+  var doc = DocumentApp.openById("YOUR EMAIL TEMPLATE DOCUMENT ID");
   
   var text = doc.getBody().getText();
   var body = doc.getBody();
