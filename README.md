@@ -1,4 +1,4 @@
-# Custom CRM off GAS and Google Colab
+# Custom CRM based on GAS and Google Colab
 As shown in Linkedin: https://www.linkedin.com/pulse/unified-custom-crm-off-commonly-used-digital-tools-google-sean-yap/?trackingId=XlpPNR6PkhLRlI7Yty84OA%3D%3D
 
 Refer to this spreadsheet for reference when you start to understand the code: https://docs.google.com/spreadsheets/d/1jIRUT7RJFH_cmxnC_fb4EXs1h5w50IfiyFKLcdCVDDw/edit#gid=0
